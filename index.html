@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GRUPO VIP TRADING</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#0b1220;color:#fff}
+.app{max-width:600px;margin:auto;min-height:100vh;background:#111c2d;display:flex;flex-direction:column}
+header{background:#14243a;padding:15px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #263a52}
+.logo{width:45px;height:45px;border-radius:50%;background:#16a085;display:grid;place-items:center;font-weight:bold}
+.headinfo{flex:1}.headinfo h2{font-size:17px}
+.headinfo p{font-size:12px;color:#9bb0c8;margin-top:5px}
+.status{font-size:11px;color:#49dba3}
+.tabs{display:flex;background:#14243a}
+.tab{flex:1;border:0;background:none;color:#9bb0c8;padding:14px 4px;cursor:pointer}
+.tab.active{color:#40d5a0;border-bottom:2px solid #40d5a0}
+main{flex:1;padding:15px}
+section.hidden{display:none}
+.card{background:#1a2b41;padding:16px;border-radius:13px;margin-bottom:15px}
+.card h3{margin-bottom:9px}
+.muted{font-size:13px;color:#b1c1d4;line-height:1.5}
+.title{font-size:14px;color:#b9cbe0;margin:20px 0 10px}
+.profile{display:flex;align-items:center;gap:11px;padding:12px 4px;border-bottom:1px solid #25364b}
+.avatar{width:43px;height:43px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;background:#237f9e;font-weight:bold}
+.info{flex:1;min-width:0}.info h4{font-size:14px;overflow-wrap:anywhere}
+.info p{font-size:11px;color:#9bb0c8;margin-top:5px}
+.badge{font-size:10px;padding:5px 7px;border-radius:6px;background:#164e43;color:#63efbd}
+input,select{width:100%;padding:13px;margin-top:10px;border-radius:9px;border:1px solid #354c66;background:#0e1928;color:white;font-size:14px}
+button.primary{width:100%;padding:13px;border:0;border-radius:9px;background:#16a085;color:white;font-weight:bold;margin-top:10px;cursor:pointer}
+.chatbox{display:flex;flex-direction:column;gap:10px;margin:14px 0}
+.msg{max-width:90%;background:#20334a;padding:11px 12px;border-radius:12px;overflow-wrap:anywhere;align-self:flex-start}
+.msg.mine{align-self:flex-end;background:#075e50}
+.sender{font-size:12px;color:#7fd8ff;font-weight:bold;margin-bottom:7px}
+.text{font-size:14px;white-space:pre-wrap;line-height:1.45}
+.time{font-size:10px;color:#b1c4d4;text-align:right;margin-top:7px}
+.chat-photo{display:block;width:100%;max-width:260px;max-height:320px;object-fit:contain;border-radius:8px;margin-top:5px}
+.composer{position:sticky;bottom:0;background:#111c2d;padding:10px 0;display:flex;align-items:center;gap:7px}
+.composer input{margin:0;min-width:0}.composer .message-field{flex:1}
+.icon-button{height:43px;min-width:43px;border:0;border-radius:10px;background:#263d55;color:white;font-size:21px;cursor:pointer}
+.send-button{height:43px;padding:0 13px;border:0;border-radius:9px;background:#16a085;color:white;font-weight:bold}
+.small{font-size:11px;color:#8da5bf;line-height:1.5;margin-top:12px}
+footer{display:flex;justify-content:space-around;background:#14243a;padding:13px 4px;border-top:1px solid #263a52}
+.footer-item{color:#9bb0c8;font-size:11px;text-align:center;cursor:pointer}
+.footer-item span{display:block;font-size:20px;margin-bottom:5px}
+.footer-item.active{color:#40d5a0}
+.hidden{display:none!important}
+.photo-preview{max-width:100%;max-height:180px;display:none;margin:8px 0;border-radius:10px}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+<div class="logo">VIP</div>
+<div class="headinfo"><h2>GRUPO VIP TRADING</h2><p>Comunidade de trading</p></div>
+<div class="status">● Online</div>
+</header>
+<nav class="tabs">
+<button class="tab active" onclick="showTab('inicio',this)">Início</button>
+<button class="tab" onclick="showTab('membros',this)">Membros</button>
+<button class="tab" onclick="showTab('chat',this)">Chat 💬</button>
+</nav>
+<main>
+<section id="inicio">
+<div class="card"><h3>📈 GRUPO VIP TRADING</h3><p class="muted">Bem-vindo à comunidade dedicada ao trading, aos mercados financeiros e à partilha de conhecimentos.</p></div>
+<div class="card"><h3>👤 Entrar no grupo</h3><p class="muted">Introduz o teu nome para te registares como membro VIP.</p><input id="username" maxlength="35" placeholder="Nome do utilizador"><button class="primary" onclick="joinGroup()">Entrar no grupo VIP</button><p class="small">Os membros são guardados no Firebase.</p></div>
+<h3 class="title">👑 Membros VIP</h3><div id="previewMembers"></div>
+</section>
+<section id="membros" class="hidden"><h3>👑 Membros VIP registados</h3><div id="memberList"></div></section>
+<section id="chat" class="hidden">
+<div class="card"><h3>💬 Chat do grupo</h3><p class="muted" id="chatStatus">Entra no grupo para participar.</p></div>
+<div id="adminPanel" class="card hidden"><h3>👑 Administração</h3><p class="muted">Celestino Bengui</p><label class="small" for="senderSelect">Selecionar perfil de envio</label><select id="senderSelect"></select></div>
+<div id="connectionStatus" class="small">A ligar ao Firebase...</div>
+<div id="chatbox" class="chatbox"></div>
+<div class="composer"><button class="icon-button" onclick="document.getElementById('photoInput').click()">📷</button><input id="messageInput" class="message-field" maxlength="1000" placeholder="Mensagem..."><button class="send-button" onclick="sendMessage()">Enviar</button></div>
+<input id="photoInput" type="file" accept="image/*" class="hidden">
+<img id="photoPreview" class="photo-preview" alt="Pré-visualização">
+<button id="sendPhotoButton" class="primary hidden" onclick="sendPhoto()">Enviar fotografia</button>
+<p class="small">As mensagens são sincronizadas através do Firebase.</p>
+</section>
+</main>
+<footer>
+<div class="footer-item active" onclick="footerTab('inicio',this)"><span>⌂</span>Início</div>
+<div class="footer-item" onclick="footerTab('membros',this)"><span>♙</span>Membros</div>
+<div class="footer-item" onclick="footerTab('chat',this)"><span>💬</span>Chat</div>
+</footer>
+</div>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
+import{getDatabase,ref,push,set,onValue,query,limitToLast}from"https://www.gstatic.com/firebasejs/13.0.0/firebase-database.js";
+
+const app=initializeApp({
+apiKey:"AIzaSyBy3cJcZpOhk4sboEWeGaZoCtusyLbgPC0",
+authDomain:"grupo-vip-85a67.firebaseapp.com",
+databaseURL:"https://grupo-vip-85a67-default-rtdb.firebaseio.com",
+projectId:"grupo-vip-85a67",
+storageBucket:"grupo-vip-85a67.firebasestorage.app",
+messagingSenderId:"1044664669540",
+appId:"1:1044664669540:web:c9018ad93208c0c7ad1671",
+measurementId:"G-24M3K45P58"
+});
+
+const db=getDatabase(app);
+const messagesRef=ref(db,"messages");
+const membersRef=ref(db,"members");
+const initialUsers=["Celestino Bengui","Tony","Sova Soba","Michael","TM Tininho","Victor","Paulo","Manuel","António","Carlos","Daniel","Fernando","Ricardo","André","VIP"];
+let users=[],messages=[],currentUser=localStorage.getItem("vipTradingCurrentUser")||"",isAdmin=false,pendingPhoto=null,chatStarted=false;
+
+const $=id=>document.getElementById(id);
+function now(){return new Date().toLocaleString("pt-PT",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"})}
+function status(t){$("connectionStatus").textContent=t}
+
+function showTab(id,b){
+document.querySelectorAll("main section").forEach(s=>s.classList.add("hidden"));
+$(id).classList.remove("hidden");
+document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+if(b)b.classList.add("active");
+if(id==="membros")renderMembers();
+if(id==="chat")renderMessages();
+}
+window.showTab=showTab;
+
+function footerTab(id,el){
+showTab(id,null);
+document.querySelectorAll(".footer-item").forEach(x=>x.classList.remove("active"));
+el.classList.add("active");
+document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",(t.textContent.includes("Início")?"inicio":t.textContent.includes("Membros")?"membros":"chat")===id));
+}
+window.footerTab=footerTab;
+
+function setupAdminSelect(){
+let s=$("senderSelect");s.innerHTML="";
+users.forEach(n=>{let o=document.createElement("option");o.value=n;o.textContent=n;s.appendChild(o)});
+s.value=users.find(n=>n.toLowerCase()==="celestino bengui")||users[0]||"";
+}
+function getSender(){return isAdmin?$("senderSelect").value:currentUser}
+
+function renderMessages(){
+let b=$("chatbox");b.innerHTML="";
+messages.forEach(m=>{
+let d=document.createElement("div");
+d.className="msg"+(m.sender===currentUser?" mine":"");
+let s=document.createElement("div");s.className="sender";s.textContent=m.sender||"Membro";
+let body=document.createElement("div");body.className="text";
+if(m.type==="image"&&m.image){
+let im=document.createElement("img");im.className="chat-photo";im.src=m.image;im.alt="Fotografia enviada";im.loading="lazy";body.appendChild(im);
+}else body.textContent=m.text||"";
+let t=document.createElement("div");t.className="time";t.textContent=m.time||"";
+d.append(s,body,t);b.appendChild(d);
+});
+b.scrollTop=b.scrollHeight;
+}
+
+function renderMembers(){
+["memberList","previewMembers"].forEach(id=>{
+let l=$(id);l.innerHTML="";
+users.filter(n=>n.toLowerCase()!=="celestino bengui").forEach(n=>{
+let r=document.createElement("div");r.className="profile";
+let a=document.createElement("div");a.className="avatar";a.textContent=n.charAt(0).toUpperCase();
+let i=document.createElement("div");i.className="info";
+let h=document.createElement("h4");h.textContent=n;
+let p=document.createElement("p");p.textContent="Membro VIP permanente";
+i.append(h,p);
+let badge=document.createElement("span");badge.className="badge";badge.textContent="👑 VIP";
+r.append(a,i,badge);l.appendChild(r);
+});
+});
+}
+
+async function joinGroup(){
+let n=$("username").value.trim();
+if(n.length<2)return alert("Escreve um nome com pelo menos 2 caracteres.");
+try{
+const snap=await new Promise((resolve,reject)=>onValue(membersRef,s=>resolve(s),reject,{onlyOnce:true}));
+let data=snap.val()||{};
+users=Object.values(data).filter(x=>typeof x==="string");
+let found=users.find(x=>x.toLowerCase()===n.toLowerCase());
+let u=found||n;
+if(!found)await set(ref(db,"members/"+encodeURIComponent(u).replaceAll(".","%2E")),u);
+currentUser=u;localStorage.setItem("vipTradingCurrentUser",u);
+isAdmin=u.toLowerCase()==="celestino bengui";
+$("chatStatus").textContent="Ligado como "+u+" · Membro VIP permanente";
+$("adminPanel").classList.toggle("hidden",!isAdmin);
+if(isAdmin)setupAdminSelect();
+renderMembers();
+showTab("chat",document.querySelectorAll(".tab")[2]);
+}catch(e){alert("Erro ao entrar no grupo. Verifica as regras do Firebase.");console.error(e)}
+}
+window.joinGroup=joinGroup;
+
+async function sendMessage(){
+let i=$("messageInput"),t=i.value.trim();
+if(!currentUser)return alert("Entra no grupo primeiro.");
+if(!t)return;
+try{
+await push(messagesRef,{sender:getSender(),text:t,time:now(),type:"text",createdAt:Date.now()});
+i.value="";
+}catch(e){alert("Não foi possível enviar. Verifica a ligação e as regras do Firebase.");console.error(e)}
+}
+window.sendMessage=sendMessage;
+
+$("photoInput").addEventListener("change",function(){
+let f=this.files[0];if(!f)return;
+if(f.size>10*1024*1024){alert("A fotografia deve ter menos de 10 MB.");this.value="";return}
+let r=new FileReader();
+r.onload=e=>{pendingPhoto=e.target.result;$("photoPreview").src=pendingPhoto;$("photoPreview").style.display="block";$("sendPhotoButton").classList.remove("hidden")};
+r.readAsDataURL(f);
+});
+
+async function sendPhoto(){
+if(!currentUser)return alert("Entra no grupo primeiro.");
+if(!pendingPhoto)return;
+try{
+await push(messagesRef,{sender:getSender(),image:pendingPhoto,text:"",time:now(),type:"image",createdAt:Date.now()});
+pendingPhoto=null;$("photoInput").value="";$("photoPreview").removeAttribute("src");$("photoPreview").style.display="none";$("sendPhotoButton").classList.add("hidden");
+}catch(e){alert("Não foi possível enviar a fotografia.");console.error(e)}
+}
+window.sendPhoto=sendPhoto;
+
+$("messageInput").addEventListener("keydown",e=>{if(e.key==="Enter")sendMessage()});
+
+function startRealtime(){
+if(chatStarted)return;
+chatStarted=true;
+onValue(query(messagesRef,limitToLast(1000)),snap=>{
+let data=snap.val()||{};
+messages=Object.entries(data).map(([id,m])=>({...m,id})).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+renderMessages();
+status("Ligado ao Firebase · "+messages.length+" mensagens carregadas");
+},e=>{status("Erro ao carregar mensagens: "+e.message);console.error(e)});
+
+onValue(membersRef,snap=>{
+let data=snap.val()||{};
+users=Object.values(data).filter(x=>typeof x==="string");
+initialUsers.forEach(n=>{if(!users.some(u=>u.toLowerCase()===n.toLowerCase()))users.push(n)});
+renderMembers();
+if(isAdmin)setupAdminSelect();
+},e=>{console.error(e);status("Erro ao carregar membros: "+e.message)});
+}
+
+async function init(){
+startRealtime();
+if(currentUser){
+isAdmin=currentUser.toLowerCase()==="celestino bengui";
+$("chatStatus").textContent="Ligado como "+currentUser+" · Membro VIP permanente";
+$("adminPanel").classList.toggle("hidden",!isAdmin);
+}
+try{
+const snap=await new Promise((resolve,reject)=>onValue(membersRef,s=>resolve(s),reject,{onlyOnce:true}));
+let data=snap.val()||{};
+let existing=Object.values(data).filter(x=>typeof x==="string");
+for(const n of initialUsers){
+if(!existing.some(x=>x.toLowerCase()===n.toLowerCase())){
+await push(membersRef,n);
+existing.push(n);
+}
+}
+}catch(e){status("Erro Firebase: "+e.message);console.error(e)}
+renderMembers();
+}
+init();
+</script>
+</body>
+</html>
